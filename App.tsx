@@ -2,9 +2,9 @@
 import React, { useState, useMemo } from 'react';
 import { ScheduleCalendar } from './components/ScheduleCalendar';
 import { Legend } from './components/Legend';
-import { mockScheduleData, LEGEND_DATA } from './constants';
+import { mockScheduleData, LEGEND_DATA, generalHolidays } from './constants';
 import type { Person } from './types';
-import { subMonths, addMonths } from 'date-fns';
+import { subMonths, addMonths, getDaysInMonth, format } from 'date-fns';
 
 const App: React.FC = () => {
   const [scheduleData, setScheduleData] = useState<Person[]>(mockScheduleData);
@@ -37,6 +37,34 @@ const App: React.FC = () => {
 
   const monthName = useMemo(() => currentDate.toLocaleString('es-ES', { month: 'long', year: 'numeric' }), [currentDate]);
 
+  const processedScheduleData = useMemo(() => {
+    const processedData = JSON.parse(JSON.stringify(scheduleData));
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const numDays = getDaysInMonth(currentDate);
+
+    for (let day = 1; day <= numDays; day++) {
+        const date = new Date(year, month, day);
+        const dateStr = format(date, 'yyyy-MM-dd');
+        const holidayType = generalHolidays[dateStr];
+
+        if (holidayType) {
+            processedData.forEach((person: Person) => {
+                if (holidayType === 'FN' || holidayType === 'FA') {
+                    person.schedule[dateStr] = holidayType;
+                } else if (holidayType === 'FL') {
+                    const currentCode = person.schedule[dateStr]?.toUpperCase();
+                    if (currentCode !== 'M' && currentCode !== 'T') {
+                         person.schedule[dateStr] = holidayType;
+                    }
+                }
+            });
+        }
+    }
+    return processedData;
+  }, [scheduleData, currentDate]);
+
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
       <header className="bg-white shadow-md">
@@ -51,32 +79,29 @@ const App: React.FC = () => {
       </header>
 
       <main className="container mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <div className="flex justify-between items-center p-4 border-b">
-                    <button 
-                        onClick={goToPreviousMonth} 
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        &larr; Anterior
-                    </button>
-                    <h2 className="text-xl font-semibold capitalize">{monthName}</h2>
-                    <button 
-                        onClick={goToNextMonth} 
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Siguiente &rarr;
-                    </button>
-                </div>
-                <ScheduleCalendar
-                    scheduleData={scheduleData}
-                    currentDate={currentDate}
-                    onUpdateSchedule={handleUpdateSchedule}
-                />
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="flex justify-between items-center p-4 border-b">
+                <button 
+                    onClick={goToPreviousMonth} 
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    &larr; Anterior
+                </button>
+                <h2 className="text-xl font-semibold capitalize">{monthName}</h2>
+                <button 
+                    onClick={goToNextMonth} 
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Siguiente &rarr;
+                </button>
             </div>
-          </div>
-          <aside className="lg:col-span-1">
-            <Legend legendData={LEGEND_DATA} />
-          </aside>
+            <ScheduleCalendar
+                scheduleData={processedScheduleData}
+                currentDate={currentDate}
+                onUpdateSchedule={handleUpdateSchedule}
+            />
+        </div>
+        
+        <div className="mt-8">
+          <Legend legendData={LEGEND_DATA} />
         </div>
       </main>
 
