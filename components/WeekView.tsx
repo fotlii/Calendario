@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import type { Person } from '../types';
 import { format, addDays } from 'date-fns';
@@ -55,8 +54,8 @@ export const WeekView: React.FC<WeekViewProps> = ({ weekDate, scheduleData, onCl
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {scheduleData.map(person => (
-                <tr key={person.id}>
-                  <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">
+                <tr key={person.id} className="h-14">
+                  <td className="px-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white flex items-center">
                     {person.name}
                   </td>
                   {weekDays.map(day => {
@@ -66,11 +65,11 @@ export const WeekView: React.FC<WeekViewProps> = ({ weekDate, scheduleData, onCl
                         <td key={day.dateStr} className="text-center p-0 text-sm font-bold text-black border-l">
                             {codes.length > 1 ? (
                                 <div className="flex h-full w-full">
-                                    <div className={`w-1/2 h-full flex items-center justify-center py-2 ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
-                                    <div className={`w-1/2 h-full flex items-center justify-center py-2 ${getCodeColor(codes[1])}`}>{codes[1]}</div>
+                                    <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
+                                    <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
                                 </div>
                             ) : (
-                                <div className={`w-full h-full flex items-center justify-center px-2 py-2 ${getCodeColor(code)}`}>
+                                <div className={`w-full h-full flex items-center justify-center ${getCodeColor(code)}`}>
                                     {code === 'D' ? '' : code}
                                 </div>
                             )}

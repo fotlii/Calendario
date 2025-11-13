@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { getDaysInMonth, startOfMonth, getDay, format, startOfWeek, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -12,6 +11,7 @@ interface ScheduleCalendarProps {
   scheduleData: Person[];
   currentDate: Date;
   onUpdateSchedule: (personId: string, updates: Record<string, string>) => void;
+  onReactivateFromDate: (personId: string, activationDate: Date, newShift: 'M' | 'T' | 'JF') => void;
   onShowWeek: (date: Date) => void;
 }
 
@@ -28,7 +28,7 @@ const getCodeColor = (code: string): string => {
   return item ? item.color : 'bg-gray-200';
 };
 
-export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData, currentDate, onUpdateSchedule, onShowWeek }) => {
+export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData, currentDate, onUpdateSchedule, onReactivateFromDate, onShowWeek }) => {
   const [suggestion, setSuggestion] = useState<Person | null>(null);
   const [diagnosticData, setDiagnosticData] = useState<DiagnosticResult[] | null>(null);
   const [popover, setPopover] = useState<PopoverState | null>(null);
@@ -89,6 +89,16 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
   };
 
   const updateScheduleCode = (personId: string, dateStr: string, newCode: string) => {
+    const person = scheduleData.find(p => p.id === personId);
+    if (!person) return;
+    
+    // Check for reactivation
+    const isPrimaryShift = ['M', 'T', 'JF'].includes(newCode.toUpperCase());
+    if (person.defaultShift === 'B' && isPrimaryShift) {
+        onReactivateFromDate(personId, new Date(dateStr), newCode.toUpperCase() as 'M' | 'T' | 'JF');
+        return;
+    }
+
     const dayOfWeek = getDay(new Date(dateStr));
     const allowedSaturdayCodes = ['MS', 'TD'];
     if (dayOfWeek === 6 && !allowedSaturdayCodes.some(c => newCode.toUpperCase().includes(c))) {
@@ -116,7 +126,6 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
         newCode = parts.length > 0 ? `${parts[0]}/P` : 'D/P';
       }
     } else {
-      // It's a main shift. Overwrite everything.
       newCode = code;
     }
     
@@ -129,10 +138,18 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
     const { personId, dateStr, code } = popover;
 
     const weekStart = startOfWeek(new Date(dateStr), { weekStartsOn: 1 });
-    const updates: Record<string, string> = {};
     const person = scheduleData.find(p => p.id === personId);
     if (!person) return;
 
+    // Special handling for reactivation: it affects the entire future, not just one week.
+    const isPrimaryShift = ['M', 'T', 'JF'].includes(code.toUpperCase());
+    if (person.defaultShift === 'B' && isPrimaryShift) {
+        onReactivateFromDate(personId, new Date(dateStr), code.toUpperCase() as 'M' | 'T' | 'JF');
+        setPopover(null);
+        return;
+    }
+
+    const updates: Record<string, string> = {};
     for (let i = 0; i < 7; i++) {
       const dayInWeek = addDays(weekStart, i);
       const dayOfWeek = getDay(dayInWeek);
@@ -151,7 +168,6 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
           newCode = parts.length > 0 ? `${parts[0]}/P` : 'D/P';
         }
       } else {
-        // It's a main shift. Overwrite everything.
         newCode = code;
       }
 
@@ -194,8 +210,8 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
             </thead>
             <tbody className="bg-white">
               {scheduleData.map(person => (
-                <tr key={person.id} className={`border-b ${suggestion?.id === person.id ? 'ring-2 ring-offset-2 ring-indigo-500' : ''}`}>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r">
+                <tr key={person.id} className={`border-b h-14 ${suggestion?.id === person.id ? 'ring-2 ring-offset-2 ring-indigo-500' : ''}`}>
+                  <td className="px-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r flex flex-col justify-center">
                     <div>{person.name}</div>
                     <div className="text-xs text-gray-500">{person.role}</div>
                   </td>
@@ -219,7 +235,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
                             <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
                           </div>
                         ) : (
-                          <div className={`w-full h-full flex items-center justify-center px-2 py-2 ${getCodeColor(code)}`}>
+                          <div className={`w-full h-full flex items-center justify-center ${getCodeColor(code)}`}>
                             {isWeekend && isDayOff ? '✨' : (code === 'D' ? '' : code)}
                           </div>
                         )}

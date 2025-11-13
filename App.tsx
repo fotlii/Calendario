@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo } from 'react';
 import { ScheduleCalendar } from './components/ScheduleCalendar';
 import { Legend } from './components/Legend';
 import { initialTeamMembers, LEGEND_DATA, generalHolidays, CONFIG } from './constants';
 import type { Person, TeamMember } from './types';
-import { subMonths, addMonths, getDaysInMonth, format, getDay, startOfWeek, addDays, differenceInDays, isAfter, startOfToday } from 'date-fns';
+import { subMonths, addMonths, getDaysInMonth, format, getDay, startOfWeek, addDays, differenceInDays, isAfter, startOfDay } from 'date-fns';
 import { WeekView } from './components/WeekView';
 import { TeamManager } from './components/TeamManager';
 
@@ -21,6 +20,33 @@ const App: React.FC = () => {
       return { ...prev, [personId]: newPersonOverrides };
     });
   };
+  
+  const handleReactivateFromDate = (personId: string, activationDate: Date, newShift: 'M' | 'T' | 'JF') => {
+    // 1. Update the team member's default shift
+    setTeam(prev => prev.map(p => p.id === personId ? { ...p, defaultShift: newShift } : p));
+    
+    // 2. Clear future 'B' overrides from the activation date forward
+    setScheduleOverrides(prev => {
+        const newOverrides = { ...prev };
+        const personOverrides = { ...(newOverrides[personId] || {}) };
+        const activationStart = startOfDay(activationDate);
+
+        Object.keys(personOverrides).forEach(dateStr => {
+            const date = new Date(dateStr);
+            // Check if the date is on or after the activation date and the code is 'B'
+            if (!isAfter(activationStart, date) && personOverrides[dateStr] === 'B') {
+                delete personOverrides[dateStr];
+            }
+        });
+        
+        // Ensure the activation day itself has the new shift
+        personOverrides[format(activationDate, 'yyyy-MM-dd')] = newShift;
+
+        newOverrides[personId] = personOverrides;
+        return newOverrides;
+    });
+  };
+
 
   const handleAddMember = (newMember: Omit<TeamMember, 'id'>) => {
     const newId = `p${Date.now()}`;
@@ -37,25 +63,8 @@ const App: React.FC = () => {
   };
 
   const handleReactivateMember = (personId: string, newShift: 'M' | 'T' | 'JF') => {
-    setTeam(prev => prev.map(p => p.id === personId ? { ...p, defaultShift: newShift } : p));
-    
-    // Clear future 'B' overrides for this person so the new default shift can apply
-    setScheduleOverrides(prev => {
-        const newOverrides = { ...prev };
-        const personOverrides = { ...(newOverrides[personId] || {}) };
-        const today = startOfToday();
-
-        Object.keys(personOverrides).forEach(dateStr => {
-            const date = new Date(dateStr);
-            if (isAfter(date, today) && personOverrides[dateStr] === 'B') {
-                delete personOverrides[dateStr];
-            }
-        });
-
-        newOverrides[personId] = personOverrides;
-        return newOverrides;
-    });
-    
+    // This function is for the Team Manager, activating from today forward.
+    handleReactivateFromDate(personId, new Date(), newShift);
     setIsTeamManagerOpen(false);
   };
 
@@ -207,6 +216,7 @@ const App: React.FC = () => {
               scheduleData={sortedAndProcessedData}
               currentDate={currentDate}
               onUpdateSchedule={handleUpdateSchedule}
+              onReactivateFromDate={handleReactivateFromDate}
               onShowWeek={handleShowWeek}
             />
           </div>
