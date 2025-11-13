@@ -1,0 +1,5 @@
+{
+  "name": "Saturday Shift Scheduler",
+  "description": "An intelligent scheduling tool to help managers assign Saturday shifts fairly based on historical data and specific exclusion rules. It suggests, assigns, and diagnoses eligibility for each team member.",
+  "requestFramePermissions": []
+}

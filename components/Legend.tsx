@@ -1,0 +1,25 @@
+
+import React from 'react';
+import type { LegendItem } from '../types';
+
+interface LegendProps {
+  legendData: LegendItem[];
+}
+
+export const Legend: React.FC<LegendProps> = ({ legendData }) => {
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-lg">
+      <h3 className="text-xl font-bold mb-4 text-gray-800">Leyenda</h3>
+      <div className="grid grid-cols-1 gap-3">
+        {legendData.map(({ code, description, color }) => (
+          <div key={code} className="flex items-center">
+            <span className={`w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold mr-3 ${color}`}>
+              {code}
+            </span>
+            <span className="text-sm text-gray-700">{description}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
