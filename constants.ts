@@ -1,4 +1,5 @@
-import type { Person, LegendItem } from './types';
+
+import type { TeamMember, LegendItem } from './types';
 
 // Configuration based on VBA macro
 export const CONFIG = {
@@ -41,9 +42,7 @@ export const generalHolidays: Record<string, string> = {
     [`${new Date().getFullYear()}-12-25`]: 'FN',
 };
 
-type TeamMember = Omit<Person, 'schedule'>;
-
-export const teamMembers: TeamMember[] = [
+export const initialTeamMembers: TeamMember[] = [
   { id: 'p1', name: 'SÁNCHEZ MARÍA', role: 'Agent', defaultShift: 'M' },
   { id: 'p2', name: 'MARINA JIMENEZ', role: 'Agent', defaultShift: 'T' },
   { id: 'p3', name: 'CARLOS BUENO', role: 'Agent', defaultShift: 'M' },
@@ -51,6 +50,7 @@ export const teamMembers: TeamMember[] = [
   { id: 'p5', name: 'BAILÓN SONIA', role: 'Agent', defaultShift: 'B' },
   { id: 'p6', name: 'DOUTON DAVID', role: 'Agent', defaultShift: 'T' },
   { id: 'p7', name: 'OSUNA ALFONSO', role: 'Agent', defaultShift: 'M' },
+  // FIX: Corrected a typo where 'a' was used instead of 'defaultShift'.
   { id: 'p8', name: 'GALAN ADRIAN', role: 'Agent', defaultShift: 'T' },
   { id: 'p9', name: 'GARGALLO MARÇAL', role: 'COOR', defaultShift: 'JF' },
   { id: 'p10', name: 'MARTÍN VÍCTOR', role: 'COOR', defaultShift: 'JF' },

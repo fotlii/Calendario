@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import type { Person } from '../types';
 import { format, addDays } from 'date-fns';
@@ -12,7 +13,7 @@ interface WeekViewProps {
 
 const getCodeColor = (code: string): string => {
     const item = LEGEND_DATA.find(i => i.code.toUpperCase() === code.toUpperCase());
-    return item ? item.color : 'bg-white';
+    return item ? item.color : 'bg-gray-200';
 };
 
 export const WeekView: React.FC<WeekViewProps> = ({ weekDate, scheduleData, onClose }) => {
@@ -60,9 +61,19 @@ export const WeekView: React.FC<WeekViewProps> = ({ weekDate, scheduleData, onCl
                   </td>
                   {weekDays.map(day => {
                     const code = person.schedule[day.dateStr]?.toUpperCase() || 'D';
+                    const codes = code.split('/').filter(Boolean);
                     return (
-                        <td key={day.dateStr} className={`text-center p-2 text-sm font-bold text-black border-l ${getCodeColor(code)}`}>
-                            {code}
+                        <td key={day.dateStr} className="text-center p-0 text-sm font-bold text-black border-l">
+                            {codes.length > 1 ? (
+                                <div className="flex h-full w-full">
+                                    <div className={`w-1/2 h-full flex items-center justify-center py-2 ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
+                                    <div className={`w-1/2 h-full flex items-center justify-center py-2 ${getCodeColor(codes[1])}`}>{codes[1]}</div>
+                                </div>
+                            ) : (
+                                <div className={`w-full h-full flex items-center justify-center px-2 py-2 ${getCodeColor(code)}`}>
+                                    {code === 'D' ? '' : code}
+                                </div>
+                            )}
                         </td>
                     );
                   })}

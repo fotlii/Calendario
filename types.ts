@@ -7,6 +7,8 @@ export interface Person {
   schedule: Record<string, string>; // key: 'YYYY-MM-DD', value: code
 }
 
+export type TeamMember = Omit<Person, 'schedule'>;
+
 export interface LegendItem {
   code: string;
   description: string;
