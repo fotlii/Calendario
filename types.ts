@@ -3,6 +3,7 @@ export interface Person {
   id: string;
   name: string;
   role: string;
+  defaultShift: 'M' | 'T' | 'B' | 'JF';
   schedule: Record<string, string>; // key: 'YYYY-MM-DD', value: code
 }
 

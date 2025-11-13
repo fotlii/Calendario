@@ -1,4 +1,3 @@
-
 import type { Person, LegendItem } from './types';
 
 // Configuration based on VBA macro
@@ -8,7 +7,7 @@ export const CONFIG = {
   BAJA: ['B'],
   FORMACION: ['F', 'MF', 'TF'],
   PASSTHROUGH: ['FA', 'FN'],
-  COD_TRABAJO_SABADO: ['MS'],
+  COD_TRABAJO_SABADO: ['MS', 'TD'],
   ROL_EXCLUIR: 'COOR',
   CODIGO_ASIGNAR: 'MS',
 };
@@ -21,7 +20,7 @@ export const LEGEND_DATA: LegendItem[] = [
     { code: 'JF', description: 'JORNADA FLEXIBLE', color: 'bg-green-200' },
     { code: 'M', description: 'MAÑANA COMPLETA', color: 'bg-yellow-200' },
     { code: 'MP', description: '7H Matí', color: 'bg-yellow-300' },
-    { code: 'MS', description: 'ENTRESEMANA CON SÁBADO', color: 'bg-teal-400 text-white' },
+    { code: 'MS', description: 'ENTRESEMANA CON SÁBADO', color: 'bg-teal-200' },
     { code: 'FN', description: 'FESTIVO NACIONAL', color: 'bg-orange-300' },
     { code: 'FL', description: 'FESTIVO LOCAL', color: 'bg-orange-200' },
     { code: 'T', description: 'TARDE', color: 'bg-indigo-200' },
@@ -29,71 +28,30 @@ export const LEGEND_DATA: LegendItem[] = [
     { code: 'F', description: 'FORMACIÓN', color: 'bg-pink-200' },
     { code: 'TC', description: 'Torn de contingència', color: 'bg-cyan-200' },
     { code: 'TDE', description: 'Horari torn tarda', color: 'bg-lime-200' },
-    { code: 'FA', description: 'FESTIVO AUTONÓMICO', color: 'bg-orange-400' },
+    { code: 'FA', description: 'FESTIVO AUTONÓMICO', color: 'bg-orange-300' },
 ];
 
 export const generalHolidays: Record<string, string> = {
-    '2024-08-09': 'FL', // Local holiday
-    '2024-08-15': 'FN', // National holiday
+    // Example for current year, should be dynamic in a real app
+    [`${new Date().getFullYear()}-08-15`]: 'FN',
+    [`${new Date().getFullYear()}-08-09`]: 'FL', 
+    [`${new Date().getFullYear()}-10-12`]: 'FN',
+    [`${new Date().getFullYear()}-11-01`]: 'FN',
+    [`${new Date().getFullYear()}-12-06`]: 'FN',
+    [`${new Date().getFullYear()}-12-25`]: 'FN',
 };
 
-export const mockScheduleData: Person[] = [
-  {
-    id: 'p1', name: 'SÁNCHEZ MARÍA', role: 'Agent',
-    schedule: {
-      '2024-08-01': 'M', '2024-08-02': 'M', '2024-08-05': 'M', '2024-08-06': 'M', '2024-08-07': 'M', '2024-08-08': 'M', '2024-08-09': 'M', '2024-08-12': 'M', '2024-08-13': 'M', '2024-08-14': 'M', '2024-08-16': 'M', '2024-08-19': 'M', '2024-08-20': 'M', '2024-08-21': 'M', '2024-08-22': 'M', '2024-08-23': 'M', '2024-08-26': 'M', '2024-08-27': 'M', '2024-08-28': 'M', '2024-08-29': 'M', '2024-08-30': 'M',
-    },
-  },
-  {
-    id: 'p2', name: 'MARINA JIMENEZ', role: 'Agent',
-    schedule: {
-      '2024-08-01': 'T', '2024-08-02': 'T', '2024-08-05': 'T', '2024-08-06': 'T', '2024-08-07': 'T', '2024-08-08': 'T', '2024-08-09': 'T', '2024-08-12': 'T', '2024-08-13': 'T', '2024-08-14': 'T', '2024-08-16': 'T', '2024-08-19': 'T', '2024-08-20': 'T', '2024-08-21': 'T', '2024-08-22': 'T', '2024-08-23': 'T', '2024-08-26': 'T', '2024-08-27': 'T', '2024-08-28': 'T', '2024-08-29': 'T', '2024-08-30': 'T',
-    },
-  },
-  {
-    id: 'p3', name: 'CARLOS BUENO', role: 'Agent',
-    schedule: {
-      '2024-08-01': 'M', '2024-08-02': 'M', '2024-08-05': 'M', '2024-08-06': 'M', '2024-08-07': 'M', '2024-08-08': 'M', '2024-08-12': 'M', '2024-08-13': 'M', '2024-08-14': 'M', '2024-08-16': 'M', '2024-08-19': 'M', '2024-08-20': 'M', '2024-08-21': 'M', '2024-08-22': 'M', '2024-08-23': 'M', '2024-08-26': 'M', '2024-08-27': 'M', '2024-08-28': 'M', '2024-08-29': 'M', '2024-08-30': 'M',
-    },
-  },
-  {
-    id: 'p4', name: 'ESTELLER GEMMA', role: 'Agent',
-    schedule: {
-      '2024-08-01': 'M', '2024-08-02': 'M', '2024-08-05': 'M', '2024-08-06': 'M', '2024-08-07': 'M', '2024-08-08': 'M', '2024-08-12': 'M', '2024-08-13': 'M', '2024-08-14': 'M', '2024-08-16': 'M', '2024-08-19': 'M', '2024-08-20': 'M', '2024-08-21': 'M', '2024-08-22': 'M', '2024-08-23': 'M', '2024-08-26': 'M', '2024-08-27': 'M', '2024-08-28': 'M', '2024-08-29': 'M', '2024-08-30': 'M',
-    },
-  },
-  {
-    id: 'p5', name: 'BAILÓN SONIA', role: 'Agent',
-    schedule: { '2024-08-01': 'B', '2024-08-02': 'B', '2024-08-03': 'B', '2024-08-04': 'B', '2024-08-05': 'B', '2024-08-06': 'B', '2024-08-07': 'B', '2024-08-08': 'B', '2024-08-09': 'B', '2024-08-10': 'B', '2024-08-11': 'B', '2024-08-12': 'B', '2024-08-13': 'B', '2024-08-14': 'B', '2024-08-15': 'B', '2024-08-16': 'B', '2024-08-17': 'B', '2024-08-18': 'B', '2024-08-19': 'B', '2024-08-20': 'B', '2024-08-21': 'B', '2024-08-22': 'B', '2024-08-23': 'B', '2024-08-24': 'B', '2024-08-25': 'B', '2024-08-26': 'B', '2024-08-27': 'B', '2024-08-28': 'B', '2024-08-29': 'B', '2024-08-30': 'B', '2024-08-31': 'B', },
-  },
-  {
-    id: 'p6', name: 'DOUTON DAVID', role: 'Agent',
-    schedule: {
-      '2024-08-01': 'T', '2024-08-02': 'T', '2024-08-05': 'T', '2024-08-06': 'T', '2024-08-07': 'T', '2024-08-08': 'T', '2024-08-12': 'T', '2024-08-13': 'T', '2024-08-14': 'T', '2024-08-16': 'T', '2024-08-19': 'T', '2024-08-20': 'T', '2024-08-21': 'T', '2024-08-22': 'T', '2024-08-23': 'T', '2024-08-26': 'T', '2024-08-27': 'T', '2024-08-28': 'T', '2024-08-29': 'T', '2024-08-30': 'T',
-    },
-  },
-  {
-    id: 'p7', name: 'OSUNA ALFONSO', role: 'Agent',
-    schedule: {
-      '2024-08-01': 'M', '2024-08-02': 'M', '2024-08-05': 'M', '2024-08-06': 'M', '2024-08-07': 'M', '2024-08-08': 'M', '2024-08-12': 'M', '2024-08-13': 'M', '2024-08-14': 'M', '2024-08-16': 'M', '2024-08-19': 'M', '2024-08-20': 'M', '2024-08-21': 'M', '2024-08-22': 'M', '2024-08-23': 'M', '2024-08-26': 'M', '2024-08-27': 'M', '2024-08-28': 'M', '2024-08-29': 'M', '2024-08-30': 'M',
-    },
-  },
-  {
-    id: 'p8', name: 'GALAN ADRIAN', role: 'Agent',
-    schedule: {
-      '2024-08-01': 'T', '2024-08-02': 'T', '2024-08-05': 'T', '2024-08-06': 'T', '2024-08-07': 'T', '2024-08-08': 'T', '2024-08-12': 'T', '2024-08-13': 'T', '2024-08-14': 'T', '2024-08-16': 'T', '2024-08-19': 'T', '2024-08-20': 'T', '2024-08-21': 'T', '2024-08-22': 'T', '2024-08-23': 'T', '2024-08-26': 'T', '2024-08-27': 'T', '2024-08-28': 'T', '2024-08-29': 'T', '2024-08-30': 'T',
-    },
-  },
-  {
-    id: 'p9', name: 'GARGALLO MARÇAL', role: 'Agent',
-    schedule: {
-      '2024-08-01': 'JF', '2024-08-02': 'JF', '2024-08-05': 'JF', '2024-08-06': 'JF', '2024-08-07': 'JF', '2024-08-08': 'JF', '2024-08-12': 'JF', '2024-08-13': 'JF', '2024-08-14': 'JF', '2024-08-16': 'JF', '2024-08-19': 'JF', '2024-08-20': 'JF', '2024-08-21': 'JF', '2024-08-22': 'JF', '2024-08-23': 'JF', '2024-08-26': 'JF', '2024-08-27': 'JF', '2024-08-28': 'JF', '2024-08-29': 'JF', '2024-08-30': 'JF',
-    },
-  },
-  {
-    id: 'p10', name: 'MARTÍN VÍCTOR', role: 'Agent',
-    schedule: {
-      '2024-08-01': 'JF', '2024-08-02': 'JF', '2024-08-05': 'JF', '2024-08-06': 'JF', '2024-08-07': 'JF', '2024-08-08': 'JF', '2024-08-12': 'JF', '2024-08-13': 'JF', '2024-08-14': 'JF', '2024-08-16': 'JF', '2024-08-19': 'JF', '2024-08-20': 'JF', '2024-08-21': 'JF', '2024-08-22': 'JF', '2024-08-23': 'JF', '2024-08-26': 'JF', '2024-08-27': 'JF', '2024-08-28': 'JF', '2024-08-29': 'JF', '2024-08-30': 'JF',
-    },
-  },
+type TeamMember = Omit<Person, 'schedule'>;
+
+export const teamMembers: TeamMember[] = [
+  { id: 'p1', name: 'SÁNCHEZ MARÍA', role: 'Agent', defaultShift: 'M' },
+  { id: 'p2', name: 'MARINA JIMENEZ', role: 'Agent', defaultShift: 'T' },
+  { id: 'p3', name: 'CARLOS BUENO', role: 'Agent', defaultShift: 'M' },
+  { id: 'p4', name: 'ESTELLER GEMMA', role: 'Agent', defaultShift: 'M' },
+  { id: 'p5', name: 'BAILÓN SONIA', role: 'Agent', defaultShift: 'B' },
+  { id: 'p6', name: 'DOUTON DAVID', role: 'Agent', defaultShift: 'T' },
+  { id: 'p7', name: 'OSUNA ALFONSO', role: 'Agent', defaultShift: 'M' },
+  { id: 'p8', name: 'GALAN ADRIAN', role: 'Agent', defaultShift: 'T' },
+  { id: 'p9', name: 'GARGALLO MARÇAL', role: 'COOR', defaultShift: 'JF' },
+  { id: 'p10', name: 'MARTÍN VÍCTOR', role: 'COOR', defaultShift: 'JF' },
 ];
