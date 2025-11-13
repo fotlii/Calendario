@@ -25,9 +25,55 @@ const App: React.FC = () => {
   const [team, setTeam] = useState<TeamMember[]>(initialTeamMembers);
   const [isTeamManagerOpen, setIsTeamManagerOpen] = useState(false);
 
-  const handleUpdateSchedule = (personId: string, updates: Record<string, string>) => {
+  const handleUpdateSchedule = (personId: string, updates: Record<string, string>, isWeekAssignment: boolean = false) => {
+    const finalUpdates = { ...updates };
+    const person = team.find(p => p.id === personId);
+    if (!person) return;
+
+    // Logic for "full week" assignment for MS/TD shifts
+    const processWeekLogic = (dateStr: string, newCode: string) => {
+      const dayOfWeek = getDay(new Date(dateStr));
+      const weekStart = startOfWeek(new Date(dateStr), { weekStartsOn: 1 });
+      const saturdayDate = addDays(weekStart, 5);
+      const saturdayDateStr = format(saturdayDate, 'yyyy-MM-dd');
+
+      const isSaturdayShift = newCode.toUpperCase() === 'MS' || newCode.toUpperCase() === 'TD';
+      const allowedSaturdayCodes = ['MS', 'TD'];
+
+      // If assigning a Saturday shift to any day of the week, update the whole week.
+      if (isSaturdayShift) {
+        for (let i = 0; i < 6; i++) { // Monday to Saturday
+            const dayInWeek = addDays(weekStart, i);
+            const currentDayStr = format(dayInWeek, 'yyyy-MM-dd');
+            finalUpdates[currentDayStr] = newCode;
+        }
+      } 
+      // If assigning a non-Saturday shift to a day, clear the Saturday if it's MS/TD
+      else if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+          const personOverrides = scheduleOverrides[personId] || {};
+          const existingSaturdayCode = personOverrides[saturdayDateStr];
+          
+          if (allowedSaturdayCodes.includes(existingSaturdayCode?.toUpperCase())) {
+              finalUpdates[saturdayDateStr] = person.defaultShift; // or 'D'
+          }
+      }
+    };
+    
+    if (isWeekAssignment) {
+        // The first update in the object determines the logic for the whole week
+        const firstDate = Object.keys(updates)[0];
+        if (firstDate) {
+            processWeekLogic(firstDate, updates[firstDate]);
+        }
+    } else {
+        // For single day assignments, process logic for that day
+        Object.keys(updates).forEach(dateStr => {
+            processWeekLogic(dateStr, updates[dateStr]);
+        });
+    }
+
     setScheduleOverrides(prev => {
-      const newPersonOverrides = { ...(prev[personId] || {}), ...updates };
+      const newPersonOverrides = { ...(prev[personId] || {}), ...finalUpdates };
       return { ...prev, [personId]: newPersonOverrides };
     });
   };

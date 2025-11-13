@@ -57,25 +57,37 @@ export const WeekView: React.FC<WeekViewProps> = ({ weekDate, scheduleData, onCl
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {scheduleData.map(person => (
-                <tr key={person.id}>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">
-                    {person.name}
+                <tr key={person.id} className="h-14">
+                  <td className="whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">
+                     <div className="flex items-center h-full px-3">
+                        {person.name}
+                     </div>
                   </td>
                   {weekDays.map(day => {
                     const code = person.schedule[day.dateStr]?.toUpperCase() || 'D';
                     const codes = code.split('/').filter(Boolean);
+                    const hasSplitView = codes.length > 1;
+
+                    let tdClassName = `text-center text-sm font-bold text-black border-l`;
+
+                    if (!hasSplitView) {
+                       tdClassName += ` ${getCodeColor(code)}`;
+                    } else {
+                       tdClassName += ' p-0';
+                    }
+
                     return (
-                        <td key={day.dateStr} className="text-center p-0 text-sm font-bold text-black border-l">
-                            {codes.length > 1 ? (
-                                <div className="flex w-full">
-                                    <div className={`w-1/2 py-4 flex items-center justify-center ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
-                                    <div className={`w-1/2 py-4 flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
-                                </div>
-                            ) : (
-                                <div className={`w-full py-4 flex items-center justify-center ${getCodeColor(code)}`}>
-                                    {code === 'D' ? '' : code}
-                                </div>
-                            )}
+                        <td key={day.dateStr} className={tdClassName}>
+                           {hasSplitView ? (
+                               <div className="flex w-full h-full">
+                                   <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
+                                   <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
+                               </div>
+                           ) : (
+                               <div className="w-full h-full flex items-center justify-center">
+                                   {code === 'D' ? '' : code}
+                               </div>
+                           )}
                         </td>
                     );
                   })}

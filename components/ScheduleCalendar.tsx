@@ -17,7 +17,7 @@ import { AssignmentChoicePopover } from './AssignmentChoicePopover';
 interface ScheduleCalendarProps {
   scheduleData: Person[];
   currentDate: Date;
-  onUpdateSchedule: (personId: string, updates: Record<string, string>) => void;
+  onUpdateSchedule: (personId: string, updates: Record<string, string>, isWeekAssignment?: boolean) => void;
   onReactivateFromDate: (personId: string, activationDate: Date, newShift: 'M' | 'T' | 'JF') => void;
   onShowWeek: (date: Date) => void;
 }
@@ -94,49 +94,45 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
       left: rect.left + window.scrollX,
     });
   };
-
-  const updateScheduleCode = (personId: string, dateStr: string, newCode: string) => {
-    const person = scheduleData.find(p => p.id === personId);
-    if (!person) return;
-    
-    // Check for reactivation
-    const isPrimaryShift = ['M', 'T', 'JF'].includes(newCode.toUpperCase());
-    if (person.defaultShift === 'B' && isPrimaryShift) {
-        onReactivateFromDate(personId, new Date(dateStr), newCode.toUpperCase() as 'M' | 'T' | 'JF');
-        return;
-    }
-
-    const dayOfWeek = getDay(new Date(dateStr));
-    const allowedSaturdayCodes = ['MS', 'TD'];
-    if (dayOfWeek === 6 && !allowedSaturdayCodes.some(c => newCode.toUpperCase().includes(c))) {
-      alert("En sábado solo se pueden asignar los turnos 'MS' o 'TD'.");
-      return;
-    }
-    onUpdateSchedule(personId, { [dateStr]: newCode });
-  };
-
+  
   const handleAssignDay = () => {
     if (!popover) return;
     const { personId, dateStr, code } = popover;
     
     const person = scheduleData.find(p => p.id === personId);
     if (!person) return;
+
+    // Check for reactivation
+    const isPrimaryShift = ['M', 'T', 'JF'].includes(code.toUpperCase());
+    if (person.defaultShift === 'B' && isPrimaryShift) {
+        onReactivateFromDate(personId, new Date(dateStr), code.toUpperCase() as 'M' | 'T' | 'JF');
+        setPopover(null);
+        return;
+    }
     
     const existingCode = person.schedule[dateStr] || 'D';
     let newCode = code;
 
     if (code.toUpperCase() === 'P') {
-      const parts = existingCode.split('/').filter(c => c && c !== 'D');
-      if (parts.includes('P')) {
-        newCode = parts.filter(p => p !== 'P').join('') || 'D';
+      const parts = existingCode.split('/').filter(c => c && c !== 'D' && c.toUpperCase() !== 'P');
+      if (existingCode.includes('P')) {
+          newCode = parts.length > 0 ? parts[0] : 'D';
       } else {
-        newCode = parts.length > 0 ? `${parts[0]}/P` : 'D/P';
+          newCode = parts.length > 0 ? `${parts[0]}/P` : 'D/P';
       }
     } else {
       newCode = code;
     }
+
+    const dayOfWeek = getDay(new Date(dateStr));
+    const allowedSaturdayCodes = ['MS', 'TD'];
+    if (dayOfWeek === 6 && !allowedSaturdayCodes.some(c => newCode.toUpperCase().includes(c))) {
+        alert("En sábado solo se pueden asignar los turnos 'MS' o 'TD'.");
+        setPopover(null);
+        return;
+    }
     
-    updateScheduleCode(personId, dateStr, newCode);
+    onUpdateSchedule(personId, { [dateStr]: newCode }, false);
     setPopover(null);
   };
 
@@ -144,11 +140,10 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
     if (!popover) return;
     const { personId, dateStr, code } = popover;
 
-    const weekStart = startOfWeek(new Date(dateStr), { weekStartsOn: 1 });
     const person = scheduleData.find(p => p.id === personId);
     if (!person) return;
 
-    // Special handling for reactivation: it affects the entire future, not just one week.
+    // Handle reactivation
     const isPrimaryShift = ['M', 'T', 'JF'].includes(code.toUpperCase());
     if (person.defaultShift === 'B' && isPrimaryShift) {
         onReactivateFromDate(personId, new Date(dateStr), code.toUpperCase() as 'M' | 'T' | 'JF');
@@ -156,6 +151,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
         return;
     }
 
+    const weekStart = startOfWeek(new Date(dateStr), { weekStartsOn: 1 });
     const updates: Record<string, string> = {};
     for (let i = 0; i < 7; i++) {
       const dayInWeek = addDays(weekStart, i);
@@ -168,23 +164,24 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
       let newCode = code;
 
       if (code.toUpperCase() === 'P') {
-        const parts = existingCode.split('/').filter(c => c && c !== 'D');
-        if (parts.includes('P')) {
-          newCode = parts.filter(p => p !== 'P').join('') || 'D';
+        const parts = existingCode.split('/').filter(c => c && c !== 'D' && c.toUpperCase() !== 'P');
+         if (existingCode.includes('P')) {
+            newCode = parts.length > 0 ? parts[0] : 'D';
         } else {
-          newCode = parts.length > 0 ? `${parts[0]}/P` : 'D/P';
+            newCode = parts.length > 0 ? `${parts[0]}/P` : 'D/P';
         }
       } else {
         newCode = code;
       }
-
+      
       const allowedSaturdayCodes = ['MS', 'TD'];
       if (dayOfWeek === 6 && !allowedSaturdayCodes.some(c => newCode.toUpperCase().includes(c))) {
         continue;
       }
       updates[currentDayStr] = newCode;
     }
-    onUpdateSchedule(personId, updates);
+
+    onUpdateSchedule(personId, updates, true);
     setPopover(null);
   };
 
@@ -217,10 +214,12 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
             </thead>
             <tbody className="bg-white">
               {scheduleData.map(person => (
-                <tr key={person.id} className={`border-b ${suggestion?.id === person.id ? 'ring-2 ring-offset-2 ring-indigo-500' : ''}`}>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r">
-                    <div>{person.name}</div>
-                    <div className="text-xs text-gray-500">{person.role}</div>
+                <tr key={person.id} className={`border-b h-14 ${suggestion?.id === person.id ? 'ring-2 ring-offset-2 ring-indigo-500' : ''}`}>
+                  <td className="whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r">
+                     <div className="flex flex-col justify-center h-full px-4">
+                        <div>{person.name}</div>
+                        <div className="text-xs text-gray-500">{person.role}</div>
+                     </div>
                   </td>
                   {daysInMonth.map(({ date, dayOfMonth, isSunday, isSaturday }) => {
                     const dateStr = format(date, 'yyyy-MM-dd');
@@ -228,24 +227,33 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
                     const isWeekend = isSaturday || isSunday;
                     const isDayOff = code === 'D';
                     const codes = code.split('/').filter(Boolean);
+                    const hasSplitView = codes.length > 1;
+
+                    let tdClassName = `text-center text-sm font-bold text-black transition-all duration-200 border-l`;
+
+                    if (!hasSplitView) {
+                       tdClassName += ` ${getCodeColor(code)}`;
+                    } else {
+                       tdClassName += ` p-0 ${isSunday ? 'bg-red-50' : 'bg-white'}`;
+                    }
 
                     return (
                       <td 
                         key={`${person.id}-${dayOfMonth}`} 
-                        className={`p-0 text-center text-sm font-bold text-black transition-all duration-200 border-l ${isSunday ? 'bg-red-50' : 'bg-white'}`}
+                        className={tdClassName}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={(e) => handleDrop(e, person.id, dateStr)}
                       >
-                        {codes.length > 1 ? (
-                          <div className="flex w-full">
-                            <div className={`w-1/2 py-4 flex items-center justify-center ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
-                            <div className={`w-1/2 py-4 flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
-                          </div>
-                        ) : (
-                          <div className={`w-full py-4 flex items-center justify-center ${getCodeColor(code)}`}>
-                            {isWeekend && isDayOff ? '✨' : (code === 'D' ? '' : code)}
-                          </div>
-                        )}
+                         {hasSplitView ? (
+                           <div className="flex w-full h-full">
+                             <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
+                             <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
+                           </div>
+                         ) : (
+                           <div className="w-full h-full flex items-center justify-center">
+                             {isWeekend && isDayOff ? '✨' : (code === 'D' ? '' : code)}
+                           </div>
+                         )}
                       </td>
                     );
                   })}
