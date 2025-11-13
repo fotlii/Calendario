@@ -1,6 +1,11 @@
 
-import { format, subDays, getDay, isBefore, startOfDay } from 'date-fns';
 import type { Person, DiagnosticResult } from '../types';
+// FIX: Changed date-fns deep imports from default to named to fix "not callable" errors. This is likely due to an upgrade to date-fns v3.
+import { format } from 'date-fns/format';
+import { getDay } from 'date-fns/getDay';
+import { isBefore } from 'date-fns/isBefore';
+import { startOfDay } from 'date-fns/startOfDay';
+import { subDays } from 'date-fns/subDays';
 import { CONFIG } from '../constants';
 
 const formatDate = (date: Date): string => format(date, 'yyyy-MM-dd');

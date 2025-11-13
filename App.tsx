@@ -1,9 +1,20 @@
+
 import React, { useState, useMemo } from 'react';
 import { ScheduleCalendar } from './components/ScheduleCalendar';
 import { Legend } from './components/Legend';
 import { initialTeamMembers, LEGEND_DATA, generalHolidays, CONFIG } from './constants';
 import type { Person, TeamMember } from './types';
-import { subMonths, addMonths, getDaysInMonth, format, getDay, startOfWeek, addDays, differenceInDays, isAfter, startOfDay } from 'date-fns';
+// FIX: Changed date-fns deep imports from default to named to fix "not callable" errors. This is likely due to an upgrade to date-fns v3.
+import { addDays } from 'date-fns/addDays';
+import { addMonths } from 'date-fns/addMonths';
+import { differenceInDays } from 'date-fns/differenceInDays';
+import { format } from 'date-fns/format';
+import { getDay } from 'date-fns/getDay';
+import { getDaysInMonth } from 'date-fns/getDaysInMonth';
+import { isAfter } from 'date-fns/isAfter';
+import { startOfDay } from 'date-fns/startOfDay';
+import { startOfWeek } from 'date-fns/startOfWeek';
+import { subMonths } from 'date-fns/subMonths';
 import { WeekView } from './components/WeekView';
 import { TeamManager } from './components/TeamManager';
 

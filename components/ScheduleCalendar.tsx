@@ -1,6 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { getDaysInMonth, startOfMonth, getDay, format, startOfWeek, addDays } from 'date-fns';
-import { es } from 'date-fns/locale';
+// FIX: Changed date-fns deep imports from default to named to fix "not callable" errors. This is likely due to an upgrade to date-fns v3.
+import { addDays } from 'date-fns/addDays';
+import { format } from 'date-fns/format';
+import { getDay } from 'date-fns/getDay';
+import { getDaysInMonth } from 'date-fns/getDaysInMonth';
+import { startOfMonth } from 'date-fns/startOfMonth';
+import { startOfWeek } from 'date-fns/startOfWeek';
+// FIX: Changed locale import to a named import for date-fns v3 compatibility.
+import { es } from 'date-fns/locale/es';
 import type { Person, DiagnosticResult } from '../types';
 import { LEGEND_DATA, CONFIG } from '../constants';
 import { findBestCandidate, runDiagnostics } from '../services/scheduleLogic';
@@ -210,8 +217,8 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
             </thead>
             <tbody className="bg-white">
               {scheduleData.map(person => (
-                <tr key={person.id} className={`border-b h-14 ${suggestion?.id === person.id ? 'ring-2 ring-offset-2 ring-indigo-500' : ''}`}>
-                  <td className="px-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r flex flex-col justify-center">
+                <tr key={person.id} className={`border-b ${suggestion?.id === person.id ? 'ring-2 ring-offset-2 ring-indigo-500' : ''}`}>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 border-r">
                     <div>{person.name}</div>
                     <div className="text-xs text-gray-500">{person.role}</div>
                   </td>
@@ -230,12 +237,12 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({ scheduleData
                         onDrop={(e) => handleDrop(e, person.id, dateStr)}
                       >
                         {codes.length > 1 ? (
-                          <div className="flex h-full w-full">
-                            <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
-                            <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
+                          <div className="flex w-full">
+                            <div className={`w-1/2 py-4 flex items-center justify-center ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
+                            <div className={`w-1/2 py-4 flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
                           </div>
                         ) : (
-                          <div className={`w-full h-full flex items-center justify-center ${getCodeColor(code)}`}>
+                          <div className={`w-full py-4 flex items-center justify-center ${getCodeColor(code)}`}>
                             {isWeekend && isDayOff ? '✨' : (code === 'D' ? '' : code)}
                           </div>
                         )}

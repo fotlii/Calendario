@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import type { Person } from '../types';
-import { format, addDays } from 'date-fns';
-import { es } from 'date-fns/locale';
+// FIX: Changed date-fns deep imports from default to named to fix "not callable" errors. This is likely due to an upgrade to date-fns v3.
+import { addDays } from 'date-fns/addDays';
+import { format } from 'date-fns/format';
+// FIX: Changed locale import to a named import for date-fns v3 compatibility.
+import { es } from 'date-fns/locale/es';
 import { LEGEND_DATA } from '../constants';
 
 interface WeekViewProps {
@@ -54,8 +57,8 @@ export const WeekView: React.FC<WeekViewProps> = ({ weekDate, scheduleData, onCl
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {scheduleData.map(person => (
-                <tr key={person.id} className="h-14">
-                  <td className="px-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white flex items-center">
+                <tr key={person.id}>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">
                     {person.name}
                   </td>
                   {weekDays.map(day => {
@@ -64,12 +67,12 @@ export const WeekView: React.FC<WeekViewProps> = ({ weekDate, scheduleData, onCl
                     return (
                         <td key={day.dateStr} className="text-center p-0 text-sm font-bold text-black border-l">
                             {codes.length > 1 ? (
-                                <div className="flex h-full w-full">
-                                    <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
-                                    <div className={`w-1/2 h-full flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
+                                <div className="flex w-full">
+                                    <div className={`w-1/2 py-4 flex items-center justify-center ${getCodeColor(codes[0])}`}>{codes[0] === 'D' ? '' : codes[0]}</div>
+                                    <div className={`w-1/2 py-4 flex items-center justify-center ${getCodeColor(codes[1])}`}>{codes[1]}</div>
                                 </div>
                             ) : (
-                                <div className={`w-full h-full flex items-center justify-center ${getCodeColor(code)}`}>
+                                <div className={`w-full py-4 flex items-center justify-center ${getCodeColor(code)}`}>
                                     {code === 'D' ? '' : code}
                                 </div>
                             )}
